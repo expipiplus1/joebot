@@ -57,11 +57,11 @@ class JoeBot( ircutils.bot.SimpleBot ):
                 except:
                     print( "Can't load url: \"" + url + "\"" )
                     continue
-                title = h.find( ".//title" ).text
-                title = re.sub( "\n\\s*", " ", title, re.MULTILINE )
-                title = title.strip()
-                if "\n" in title:
-                    print( "I ;m aftr" )
+                title = h.find( ".//title" )
+                if not title:
+                    continue
+                title_string = re.sub( "\n\\s*", " ", title.text, re.MULTILINE )
+                title_string = title_string.strip()
                 self.send_message( event.target, title )
         except:
             self.send_message( event.target, "Something is broken in JoeBot.PrintUrlNames()" )
@@ -165,7 +165,7 @@ class JoeBot( ircutils.bot.SimpleBot ):
 
 def main():
     joe_bot = JoeBot( "joebot" )
-    joe_bot.connect( server, channel = ["#bots","#freshers", "#wn"] )
+    joe_bot.connect( server, channel = ["#bots","#freshers","#public"] )
     joe_bot.start()
 
 if __name__ == "__main__":
