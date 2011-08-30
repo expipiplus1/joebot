@@ -6,6 +6,7 @@ from modgrammar.extras import *
 import re
 import random
 from sys import *
+import signal
 
 #grammar_whitespace = re.compile("\s+")
 
@@ -219,7 +220,7 @@ class OctalLiteral( Grammar ):
         self.value = int( self.string, base = 8 )
 
 class HexadecimalLiteral( Grammar ):
-    grammar = RE ( "0[xX][0-9a-fA-F]", grammar_desc = "Hexadecimal number" )
+    grammar = RE ( "0[xX][0-9a-fA-F]+", grammar_desc = "Hexadecimal number" )
 
     def elem_init( self, sessiondata ):
         self.value = int( self.string[2:], base = 16 )
@@ -352,6 +353,16 @@ class Expression( Grammar ):
     def elem_init( self, k ):
         self.value = self[0].value
 
+class TimeError( BaseException ):
+    def __init__( self ):
+        pass
+
+def handler( signum, frame ):
+    print( "Timeout" )
+    raise TimeError()
+
+#signal.signal( signal.SIGALRM, handler )
+
 def ParseExpression( string ):
     parser = Expression.parser()
     try:
@@ -370,7 +381,7 @@ def ParseExpression( string ):
 
 def main():
     parser = Expression.parser()
-    string = "d(1-2)"
+    string = "1000^2000"
     try:
         result = parser.parse_string( string, reset = True, eof = True )
     except ParseError as e:
