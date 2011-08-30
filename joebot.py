@@ -10,6 +10,7 @@ import urllib.parse
 import urllib.request
 import json
 import re
+import sys
 
 import expression_parser
 
@@ -41,8 +42,6 @@ url_regex = """
             """
 url_pattern = re.compile( url_regex, re.VERBOSE )
 
-server = "irc.ox.ac.uk"
-
 class JoeBot( ircutils.bot.SimpleBot ):
     def PrintUrlNames( self, event ):
         try:
@@ -58,13 +57,14 @@ class JoeBot( ircutils.bot.SimpleBot ):
                     print( "Can't load url: \"" + url + "\"" )
                     continue
                 title = h.find( ".//title" )
-                if not title:
+                if title is None:
                     continue
                 title_string = re.sub( "\n\\s*", " ", title.text, re.MULTILINE )
                 title_string = title_string.strip()
-                self.send_message( event.target, title )
+                self.send_message( event.target, title_string )
         except:
             self.send_message( event.target, "Something is broken in JoeBot.PrintUrlNames()" )
+            raise
 
     def Ggl( self, event ):
         try:
@@ -156,6 +156,7 @@ class JoeBot( ircutils.bot.SimpleBot ):
             self.ParseExpression( event )
         except:
             self.send_message( event.target, "Something is broken in JoeBot.on_channel_message()" )
+            raise
 
     def on_any( self, event ):
         try:
@@ -164,8 +165,13 @@ class JoeBot( ircutils.bot.SimpleBot ):
             self.send_message( event.target, "Something is broken in JoeBot.on_any()" )
 
 def main():
+    if len( sys.argv ) < 3:
+        print( "Need a server and channel" )
+        exit()
+    server = sys.argv[1]
+    channels = sys.argv[2:]
     joe_bot = JoeBot( "joebot" )
-    joe_bot.connect( server, channel = ["#bots","#freshers","#public"] )
+    joe_bot.connect( server, channel = channels )
     joe_bot.start()
 
 if __name__ == "__main__":
