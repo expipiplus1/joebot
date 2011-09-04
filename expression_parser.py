@@ -286,7 +286,7 @@ class DieExpression( Grammar ):
               
             num_sides = self[2].value
 
-            if num_sides <= 0 or num_dice < 0:
+            if num_sides <= 0 or num_dice < 0 or num_sides != int( num_sides ) or num_dice != int( num_dice ):
                 raise DieError( self )
 
             acc = 0
