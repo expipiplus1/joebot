@@ -42,6 +42,8 @@ url_regex = """
             """
 url_pattern = re.compile( url_regex, re.VERBOSE )
 
+server = "no.server"
+
 class JoeBot( ircutils.bot.SimpleBot ):
     def PrintUrlNames( self, event ):
         try:
@@ -146,6 +148,7 @@ class JoeBot( ircutils.bot.SimpleBot ):
             log_file.write( log_string )
         except:
             self.send_message( event.target, "Something is broken in JoeBot.Log()!" )
+            raise
 
     def on_channel_message( self, event ):
         try:
@@ -163,6 +166,7 @@ class JoeBot( ircutils.bot.SimpleBot ):
             self.Log( event )
         except:
             self.send_message( event.target, "Something is broken in JoeBot.on_any()" )
+            raise
 
 def main():
     if len( sys.argv ) < 3:
@@ -170,7 +174,7 @@ def main():
         exit()
     server = sys.argv[1]
     channels = sys.argv[2:]
-    joe_bot = JoeBot( "joebot" )
+    joe_bot = JoeBot( "joeboy" )
     joe_bot.connect( server, channel = channels )
     joe_bot.start()
 
