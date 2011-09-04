@@ -267,14 +267,38 @@ class ParenthesesExpression( Grammar ):
         else:
             self.value = self[1].value
 
+class FactorialError( BaseException ):
+    def __init__( self, node ):
+        self.node = node
+
+def factorial( n ):
+    acc = 1
+    for i in range( 1, n+1 ):
+        acc *= i
+    return acc
+
+class FactorialExpression( Grammar ):
+    grammar = ParenthesesExpression, OPTIONAL( "!" )
+                   
+    def elem_init( self, k ):
+        if self.elements[1]:
+            n = self[0].value
+            if n != int( n ):
+                raise FactorialError( self )
+            if n < 0:
+                raise FactorialError( self )
+            self.value = factorial( n )
+        else:
+            self.value = self[0].value
+
 class DieError( BaseException ):
     def __init__( self, node ):
         self.node = node
 
 class DieExpression( Grammar ):
-    grammar = OR( ParenthesesExpression,
-                  G( OPTIONAL( ParenthesesExpression ), OR( L( "d", grammar_collapse_skip = False ),
-                                                            L( "D", grammar_collapse_skip = False ) ), ParenthesesExpression, collapse = True ) )
+    grammar = OR( FactorialExpression,
+                  G( OPTIONAL( FactorialExpression ), OR( L( "d", grammar_collapse_skip = False ),
+                                                            L( "D", grammar_collapse_skip = False ) ), FactorialExpression, collapse = True ) )
 
     def elem_init( self, k ):
         if len( self.elements ) == 1:
@@ -377,11 +401,15 @@ def ParseExpression( string ):
         error_string = "*** You have tried to construct an impossible die *** "
         error_string += e.node.string
         return error_string
+    except FactorialError as e:
+        error_string = "*** You have tried to evaluate an impossible factorial *** "
+        error_string += e.node.string
+        return error_string
     return str( result.value )
 
 def main():
     parser = Expression.parser()
-    string = "1000^2000"
+    string = "1.5!"
     try:
         result = parser.parse_string( string, reset = True, eof = True )
     except ParseError as e:
@@ -393,6 +421,11 @@ def main():
         exit()
     except DieError as e:
         error_string = "*** You have tried to construct an impossible die *** "
+        error_string += e.node.string
+        print( error_string )
+        exit()
+    except FactorialError as e:
+        error_string = "*** You have tried to evaluate an impossible factorial *** "
         error_string += e.node.string
         print( error_string )
         exit()
