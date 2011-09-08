@@ -48,7 +48,12 @@ class JoeBot( ircutils.bot.SimpleBot ):
     def PrintUrlNames( self, event ):
         try:
             string = event.message
+            print("BEGIN")
+            print( string )
             urls = url_pattern.findall( string )
+            print( string )
+            print("END")
+            titles = []
             for url in urls:
                 if url[0:4] != "http":
                     url = "http://" + url
@@ -63,10 +68,12 @@ class JoeBot( ircutils.bot.SimpleBot ):
                     continue
                 title_string = re.sub( "\n\\s*", " ", title.text, re.MULTILINE )
                 title_string = title_string.strip()
-                self.send_message( event.target, title_string )
+                if title_string not in titles:
+                    titles.append( title_string )
+            for title in titles:
+                self.send_message( event.target, title )
         except:
             self.send_message( event.target, "Something is broken in JoeBot.PrintUrlNames()" )
-            raise
 
     def Ggl( self, event ):
         try:
