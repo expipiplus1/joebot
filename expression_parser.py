@@ -19,6 +19,16 @@ def StripWhitespace( string ):
     ret = re.sub( "\s+", " ", string, flags = re.MULTILINE )
     return ret.strip()
 
+constant_dict = { "e": math.e,
+                  "pi": math.pi,
+                  "tau": math.pi * 2,
+                  "h": 6.62606957e-34,
+                  "c": 299792458,
+                  "G": 6.67300e-11,
+                  "L": 6.02214179e23,
+                  "Epsilon": 8.85418782e-12 }
+
+
 #format is function, min params, max params
 function_dict = { "ceil": (math.ceil, 1, 1 ),
                   "copysign": (math.copysign, 2, 2 ),
@@ -286,8 +296,21 @@ class IntegerLiteral( Grammar ):
     def elem_init( self, k ):
         self.value = self[0][0].value
 
+class Constant( Grammar ):
+    grammar = OR( "e",
+                  "pi",
+                  "tau",
+                  "h",
+                  "c",
+                  "G",
+                  "L",
+                  "Epsilon" )
+
+    def elem_init( self, k ):
+        self.value = constant_dict[self.string]
+
 class Number( Grammar ):
-    grammar = OR( FloatingLiteral, IntegerLiteral )
+    grammar = OR( FloatingLiteral, IntegerLiteral, Constant )
 
     def elem_init( self, k ):
         self.value = self[0].value
@@ -515,7 +538,7 @@ def ParseExpression( string ):
 
 def main():
     parser = Expression.parser()
-    string = "sin1,2"
+    string = "L"
     try:
         result = parser.parse_string( string, reset = True, eof = True )
     except ParseError as e:
