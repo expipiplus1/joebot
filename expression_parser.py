@@ -7,6 +7,7 @@ import re
 import random
 from sys import *
 import signal
+import math
 
 #grammar_whitespace = re.compile("\s+")
 
@@ -18,9 +19,43 @@ def StripWhitespace( string ):
     ret = re.sub( "\s+", " ", string, flags = re.MULTILINE )
     return ret.strip()
 
-def GotoNextTabstop( x ):
-    tab_width = 4
-    return ( ( x + tab_width - 1 ) // tab_width ) * tab_width
+#format is function, min params, max params
+function_dict = { "ceil": (math.ceil, 1, 1 ),
+                  "copysign": (math.copysign, 2, 2 ),
+                  "fabs": (math.fabs, 1, 1 ),
+                  "factorial": (math.factorial, 1, 1 ),
+                  "floor": (math.floor, 1, 1 ),
+                  "fmod": (math.fmod, 2, 2 ),
+                  "fsum": (math.fsum, 0, None ),
+                  "ldexp": (math.ldexp, 2, 2 ),
+                  "trunc": (math.trunc, 1, 1 ),
+                  "exp": (math.exp, 1, 1 ),
+                  "expm1": (math.expm1, 1, 1 ),
+                  "log": (math.log, 1, 2 ),
+                  "log1p": (math.log1p, 1, 1 ),
+                  "log10": (math.log10, 1, 1 ),
+                  "pow": (math.pow, 2, 2 ),
+                  "sqrt": (math.sqrt, 1, 1 ),
+                  "acos": (math.acos, 1, 1 ),
+                  "asin": (math.asin, 1, 1 ),
+                  "atan": (math.atan, 1, 1 ),
+                  "atan2": (math.atan2, 2, 2 ),
+                  "cos": (math.cos, 1, 1 ),
+                  "hypot": (math.hypot, 2, 2 ),
+                  "sin": (math.sin, 1, 1 ),
+                  "tan": (math.tan, 1, 1 ),
+                  "degrees": (math.degrees, 1, 1 ),
+                  "radians": (math.radians, 1, 1 ),
+                  "acosh": (math.acosh, 1, 1 ),
+                  "asinh": (math.asinh, 1, 1 ),
+                  "atanh": (math.atanh, 1, 1 ),
+                  "cosh": (math.cosh, 1, 1 ),
+                  "sinh": (math.sinh, 1, 1 ),
+                  "tanh": (math.tanh, 1, 1 ),
+                  "erf": (math.erf, 1, 1 ),
+                  "erfc": (math.erfc, 1, 1 ),
+                  "gamma": (math.gamma, 1, 1 ),
+                  "lgamma": (math.lgamma, 1, 1 ) }
 
 #
 # Grammar classes
@@ -257,8 +292,74 @@ class Number( Grammar ):
     def elem_init( self, k ):
         self.value = self[0].value
 
-class ParenthesesExpression( Grammar ):
+class FunctionName( Grammar ):
+    grammar = OR( "ceil",
+                  "copysign",
+                  "fabs",
+                  "factorial",
+                  "floor",
+                  "fmod",
+                  "fsum",
+                  "ldexp",
+                  "trunc",
+                  "exp",
+                  "expm1",
+                  "log",
+                  "log1p",
+                  "log10",
+                  "pow",
+                  "sqrt",
+                  "acos",
+                  "asin",
+                  "atan",
+                  "atan2",
+                  "cos",
+                  "hypot",
+                  "sin",
+                  "tan",
+                  "degrees",
+                  "radians",
+                  "acosh",
+                  "asinh",
+                  "atanh",
+                  "cosh",
+                  "sinh",
+                  "tanh",
+                  "erf",
+                  "erfc",
+                  "gamma",
+                  "lgamma" )
+
+class FunctionError( BaseException ):
+    def __init__( self, node ):
+        self.node = node
+
+class FunctionExpression( Grammar ):
     grammar = OR( Number,
+                  G( FunctionName, LIST_OF( REF( "AdditionExpression" ), sep = "," ), collapse = True ) )
+
+    def elem_init( self, k ):
+        if len( self.elements ) == 1:
+            self.value = self[0].value
+        else:
+            function_name = self[0].string
+            if function_name not in function_dict:
+                raise FunctionError( self )
+            function_declaration = function_dict[function_name]
+            function = function_declaration[0]
+            min_parameters = function_declaration[1]
+            max_parameters = function_declaration[2]
+            if len( self[1].elements ) < min_parameters:
+                raise FunctionError( self )
+            if max_parameters != None and len( self[1].elements ) > max_parameters:
+                raise FunctionError( self )
+            values = []
+            for element in self[1].elements:
+                values.append( element.value )
+            self.value = function( *values )
+
+class ParenthesesExpression( Grammar ):
+    grammar = OR( FunctionExpression,
                   G( L( "(", grammar_collapse_skip = False ), REF( "AdditionExpression" ), L( ")", grammar_collapse_skip = False ), collapse = True ) )
 
     def elem_init( self, k ):
@@ -405,11 +506,16 @@ def ParseExpression( string ):
         error_string = "*** You have tried to evaluate an impossible factorial *** "
         error_string += e.node.string
         return error_string
+    except FunctionError as e:
+        error_string = "*** You have tried to make a bad function *** "
+        error_string += e.node.string
+        print( error_string )
+        return error_string
     return str( result.value )
 
 def main():
     parser = Expression.parser()
-    string = "1.5!"
+    string = "sin1,2"
     try:
         result = parser.parse_string( string, reset = True, eof = True )
     except ParseError as e:
@@ -426,6 +532,11 @@ def main():
         exit()
     except FactorialError as e:
         error_string = "*** You have tried to evaluate an impossible factorial *** "
+        error_string += e.node.string
+        print( error_string )
+        exit()
+    except FunctionError as e:
+        error_string = "*** You have tried to make a bad function *** "
         error_string += e.node.string
         print( error_string )
         exit()
