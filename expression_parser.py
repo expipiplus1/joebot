@@ -1,4 +1,4 @@
-#!/usr/bin/env python3 
+#!/usr/bin/env python3.2
 
 from modgrammar import *
 from modgrammar import Terminal, error_result, util, GrammarClass, ParseError
@@ -532,7 +532,6 @@ def ParseExpression( string ):
     except FunctionError as e:
         error_string = "*** You have tried to make a bad function *** "
         error_string += e.node.string
-        print( error_string )
         return error_string
     return str( result.value )
 
