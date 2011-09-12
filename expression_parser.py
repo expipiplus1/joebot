@@ -359,7 +359,8 @@ class FunctionError( BaseException ):
 
 class FunctionExpression( Grammar ):
     grammar = OR( Number,
-                  G( FunctionName, LIST_OF( REF( "AdditionExpression" ), sep = "," ), collapse = True ) )
+                  G( FunctionName, LIST_OF( REF( "AdditionExpression" ), sep = "," ), collapse = True ),
+                  G( FunctionName, "(", LIST_OF( REF( "AdditionExpression" ), sep = "," ), ")", collapse = True ) )
 
     def elem_init( self, k ):
         if len( self.elements ) == 1:
