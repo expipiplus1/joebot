@@ -45,6 +45,24 @@ url_pattern = re.compile( url_regex, re.VERBOSE )
 server = "no.server"
 
 class JoeBot( ircutils.bot.SimpleBot ):
+    def __init__( self ):
+        self.last_seen = {}
+
+    def LastSeen( self, event ):
+        try:
+            if event.message[:9].lower() != "!lastseen":
+                return
+            if len( event.message ) < 10:
+                self.send_message( event.target, "Please give a name" )
+
+            name = event.message[9:].strip().lower()
+            if name not in self.last_seen:
+                self.send_message( event.target, "I've never seen that nick" )
+
+            self.send_message( event.target, self.last_seen[name] )
+        except:
+            self.send_message( event.target, "Something is broken in JoeBot.LastSeen()" )
+
     def PrintUrlNames( self, event ):
         try:
             string = event.message
@@ -153,6 +171,11 @@ class JoeBot( ircutils.bot.SimpleBot ):
             log_filename = server + "-" + event.target + ".log"
             log_file = open( log_filename, "a" )
             log_file.write( log_string )
+
+            #
+            # Update last_seen
+            #
+            self.last_seen[event.source.lower()] = log_string
         except:
             self.send_message( event.target, "Something is broken in JoeBot.Log()!" )
             raise
@@ -164,6 +187,9 @@ class JoeBot( ircutils.bot.SimpleBot ):
             self.Ggl( event )
 
             self.ParseExpression( event )
+
+            self.LastSeen( event )
+
         except:
             self.send_message( event.target, "Something is broken in JoeBot.on_channel_message()" )
             raise
