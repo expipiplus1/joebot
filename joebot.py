@@ -43,7 +43,7 @@ url_pattern = re.compile( url_regex, re.VERBOSE )
 server = "no.server"
 
 class JoeBot( ircutils.bot.SimpleBot ):
-    def __init__( self ):
+    def Init( self ):
         self.last_seen = {}
 
     def LastSeen( self, event ):
@@ -52,10 +52,12 @@ class JoeBot( ircutils.bot.SimpleBot ):
                 return
             if len( event.message ) < 10:
                 self.send_message( event.target, "Please give a name" )
+                return
 
             name = event.message[9:].strip().lower()
             if name not in self.last_seen:
                 self.send_message( event.target, "I've never seen that nick" )
+                return
 
             self.send_message( event.target, self.last_seen[name] )
         except:
@@ -209,6 +211,7 @@ def main():
     server = sys.argv[1]
     channels = sys.argv[2:]
     joe_bot = JoeBot( "joeboy" )
+    joe_bot.Init()
     joe_bot.connect( server, channel = channels )
     joe_bot.start()
 
