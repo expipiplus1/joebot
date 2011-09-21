@@ -63,6 +63,20 @@ class JoeBot( ircutils.bot.SimpleBot ):
         except:
             self.send_message( event.target, "Something is broken in JoeBot.LastSeen()" )
 
+    def GetUrlTitle( self, url ):
+        if url[0:4] != "http":
+            url = "http://" + url
+        h = None
+        try:
+            h = lxml.html.parse( url )
+        except:
+            print( "Can't load url: \"" + url + "\"" )
+            return None
+        title = h.find( ".//title" )
+        title_string = re.sub( "\n\\s*", " ", title.text, re.MULTILINE )
+        title_string = title_string.strip()
+        return title_string
+        
     def PrintUrlNames( self, event ):
         try:
             string = event.message
@@ -73,25 +87,16 @@ class JoeBot( ircutils.bot.SimpleBot ):
             print("END")
             titles = []
             for url in urls:
-                if url[0:4] != "http":
-                    url = "http://" + url
-                h = None
-                try:
-                    h = lxml.html.parse( url )
-                except:
-                    print( "Can't load url: \"" + url + "\"" )
+                title_string = self.GetUrlTitle( url )
+                if title_string is None:
                     continue
-                title = h.find( ".//title" )
-                if title is None:
-                    continue
-                title_string = re.sub( "\n\\s*", " ", title.text, re.MULTILINE )
-                title_string = title_string.strip()
                 if title_string not in titles:
                     titles.append( title_string )
             for title in titles:
                 self.send_message( event.target, title )
         except:
             self.send_message( event.target, "Something is broken in JoeBot.PrintUrlNames()" )
+            raise
 
     def Ggl( self, event ):
         try:
@@ -114,9 +119,14 @@ class JoeBot( ircutils.bot.SimpleBot ):
                 self.send_message( event.target, "Maximum of " + str( len( results ) ) + " results." )
                 return
             result_url = results[n]["unescapedUrl"]
-            self.send_message( event.target, result_url )
+            title_string = self.GetUrlTitle( result_url )
+            if title_string:
+                self.send_message( event.target, result_url + " " + title_string )
+            else:
+                self.send_message( event.target, result_url )
         except:
             self.send_message( event.target, "Something is broken in JoeBot.Ggl()!" )
+            raise
 
     def DiceRoll( self, event ):
         pass
