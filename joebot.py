@@ -73,6 +73,8 @@ class JoeBot( ircutils.bot.SimpleBot ):
             print( "Can't load url: \"" + url + "\"" )
             return None
         title = h.find( ".//title" )
+        if title is None:
+            return None
         title_string = re.sub( "\n\\s*", " ", title.text, re.MULTILINE )
         title_string = title_string.strip()
         return title_string
@@ -89,6 +91,7 @@ class JoeBot( ircutils.bot.SimpleBot ):
             for url in urls:
                 title_string = self.GetUrlTitle( url )
                 if title_string is None:
+                    print( "no title: " + url )
                     continue
                 if title_string not in titles:
                     titles.append( title_string )
