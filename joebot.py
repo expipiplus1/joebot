@@ -78,12 +78,15 @@ class JoeBot( ircutils.bot.SimpleBot ):
     def GetUrlTitle( self, url ):
         if url[0:4] != "http":
             url = "http://" + url
-        h = None
+        request = None
         try:
-            h = lxml.html.parse( url )
+            request = urllib.request.urlopen( url )
+            #h = lxml.html.parse( url )
         except:
             print( "Can't load url: \"" + url + "\"" )
             return None
+        data = request.read()
+        h = lxml.html.fromstring( str( data ) )
         title = h.find( ".//title" )
         if title is None:
             return None
