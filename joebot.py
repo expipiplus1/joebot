@@ -63,6 +63,18 @@ class JoeBot( ircutils.bot.SimpleBot ):
         except:
             self.send_message( event.target, "Something is broken in JoeBot.LastSeen()" )
 
+    def Say( self, event ):
+        try:
+            regex = r"\!say\s+(?P<target>[^\s]+)\s+(?P<message>.*)"
+            pattern = re.compile( regex )
+            match = pattern.match( event.message )
+            if not match:
+                return
+            self.send_message( match.group( "target" ), match.group( "message" ) )
+        except:
+            self.send_message( event.target, "Something is broken in JoeBot.Say()" )
+            raise
+
     def GetUrlTitle( self, url ):
         if url[0:4] != "http":
             url = "http://" + url
@@ -170,10 +182,11 @@ class JoeBot( ircutils.bot.SimpleBot ):
             log_string += event.command
             log_string += " "
 
-            for param in event.params:
-                log_string += "\""
-                log_string += param
-                log_string += "\" "
+            if not isinstance( event, ircutils.events.MessageEvent ):
+                for param in event.params:
+                    log_string += "\""
+                    log_string += param
+                    log_string += "\" "
     
             log_string += "<"
             if event.source:
@@ -206,6 +219,8 @@ class JoeBot( ircutils.bot.SimpleBot ):
 
             self.LastSeen( event )
 
+            self.Say( event )
+
         except:
             self.send_message( event.target, "Something is broken in JoeBot.on_channel_message()" )
             raise
@@ -223,7 +238,7 @@ def main():
         exit()
     server = sys.argv[1]
     channels = sys.argv[2:]
-    joe_bot = JoeBot( "joeboy" )
+    joe_bot = JoeBot( "ZZ_Bot" )
     joe_bot.Init()
     joe_bot.connect( server, channel = channels )
     joe_bot.start()
