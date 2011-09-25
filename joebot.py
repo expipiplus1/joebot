@@ -90,7 +90,8 @@ class JoeBot( ircutils.bot.SimpleBot ):
         title = h.find( ".//title" )
         if title is None:
             return None
-        title_string = re.sub( "\n\\s*", " ", title.text, re.MULTILINE )
+        title_string = bytes( title.text, "utf8" ).decode( "unicode_escape" )
+        title_string = re.sub( "\n\\s*", " ", title_string, re.MULTILINE )
         title_string = title_string.strip()
         return title_string
         
