@@ -32,7 +32,7 @@ url_regex = """
                             [a-zA-Z0-9\\-]+
                             \\.
                         )+
-                        [a-zA-Z0-9\\-]+
+                        [a-zA-Z]+
                     )
                     (?::\\d{2,5})?
                     (?:/[^\\s]*)?
@@ -215,13 +215,13 @@ class JoeBot( ircutils.bot.SimpleBot ):
 
     def on_channel_message( self, event ):
         try:
-            self.PrintUrlNames( event )
+            self.ParseExpression( event )
 
             self.Ggl( event )
 
-            self.ParseExpression( event )
-
             self.LastSeen( event )
+
+            self.PrintUrlNames( event )
 
             self.Say( event )
 
