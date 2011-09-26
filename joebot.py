@@ -72,7 +72,7 @@ class JoeBot( ircutils.bot.SimpleBot ):
                 return
             self.send_message( match.group( "target" ), match.group( "message" ) )
         except:
-            self.send_message( event.target, "Something is broken in JoeBot.Say()" )
+            self.send_message( event.target, "bleh" )
             raise
 
     def GetUrlTitle( self, url ):
@@ -114,7 +114,7 @@ class JoeBot( ircutils.bot.SimpleBot ):
             for title in titles:
                 self.send_message( event.target, title )
         except:
-            self.send_message( event.target, "Something is broken in JoeBot.PrintUrlNames()" )
+            self.send_message( event.target, "Bleh" )
             raise
 
     def Ggl( self, event ):
@@ -144,7 +144,7 @@ class JoeBot( ircutils.bot.SimpleBot ):
             else:
                 self.send_message( event.target, result_url )
         except:
-            self.send_message( event.target, "Something is broken in JoeBot.Ggl()!" )
+            self.send_message( event.target, "bLeh" )
             raise
 
     def DiceRoll( self, event ):
@@ -164,7 +164,7 @@ class JoeBot( ircutils.bot.SimpleBot ):
             result_string = expression_parser.ParseExpression( expression_string ) 
             if result_string[0] == "*":
                 if event.message[:2] == "!=":
-                    self.send_message( event.target, result_string )
+                    self.send_message( event.target, "BLEh" )
                 return
             else:
                 if len( result_string ) > 512:
@@ -173,7 +173,7 @@ class JoeBot( ircutils.bot.SimpleBot ):
                     string = result_string + " = " + expression_string
                     self.send_message( event.target, string )
         except:
-            self.send_message( event.target, "Something is broken in JoeBot.ParseExpression()!" )
+            self.send_message( event.target, "BLeh" )
 
     def Log( self, event ):
         try:
@@ -210,7 +210,7 @@ class JoeBot( ircutils.bot.SimpleBot ):
             #
             self.last_seen[event.source.lower()] = log_string
         except:
-            self.send_message( event.target, "Something is broken in JoeBot.Log()!" )
+            self.send_message( event.target, "blEh" )
             raise
 
     def on_channel_message( self, event ):
@@ -226,14 +226,14 @@ class JoeBot( ircutils.bot.SimpleBot ):
             self.Say( event )
 
         except:
-            self.send_message( event.target, "Something is broken in JoeBot.on_channel_message()" )
+            self.send_message( event.target, "BlEh" )
             raise
 
     def on_any( self, event ):
         try:
             self.Log( event )
         except:
-            self.send_message( event.target, "Something is broken in JoeBot.on_any()" )
+            self.send_message( event.target, "bLEh" )
             raise
 
 def main():
